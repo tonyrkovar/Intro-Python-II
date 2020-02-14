@@ -1,5 +1,6 @@
 from room import Room
 from player import Player
+from item import Item, Sword, Armor
 
 # Declare all the rooms
 
@@ -50,8 +51,74 @@ room['treasure'].s_to = room['narrow']
 # Print an error message if the movement isn't allowed.
 #
 # If the user enters "q", quit the game.
-print(room['narrow'].description)
+player = Player('Synicale', room['outside'])
+print(f"hello {player.name}\n\nYou find yourself in {player.current_room.name}\n\n{player.current_room.description}")
 
-while True:
-    cmd = input("Which way do you go?")
-    print(f"You head {cmd}")
+
+short_sword = Sword("Short Sword", "A short sword to fight your foes", 5)
+iron_armor = Armor('Iron Armor', "A piece of armor to protect your shoulders", 10)
+
+
+room['foyer'].add_loot(short_sword)
+room['overlook'].add_loot(iron_armor)
+commands = ['n','s','w','e', 'take sword', 'get sword', 'take armor', 'get armor', "drop armor", 'drop sword']
+
+run = True
+while run == True:
+    cmd = input("What do you do? ")
+    if len(cmd) == 1: 
+        if cmd in commands[:4]:
+            
+            player.move(cmd)
+
+            if len(player.current_room.items):
+                print(f'\nYou spot {player.current_room.items[0].name} laying on the ground.')
+
+        elif cmd == "q":
+
+            print("Goodbye, coward.")
+            run = False
+
+        elif cmd == 'i':
+
+            if len(player.inventory) > 0:
+                player.get_inventory()
+
+            elif len(player.inventory) == 0:
+                print(f"Your inventory is empty")
+
+    elif len(cmd) > 1:
+
+        if cmd in commands[4:6]:
+            if len(player.current_room.items) > 0:
+                print(f'\nYou pickup the {player.current_room.items[0].name}, maybe there is a scabbard nearby')
+                player.grab_item(player.current_room.items[0]) 
+                player.current_room.items.remove(player.current_room.items[0]) 
+            else:
+                print(f"There is nothing here")
+
+        elif cmd in commands[6:8]:
+
+            if len(player.current_room.items) > 0:
+                print(f'\nYou put the {player.current_room.items[0].name} on')
+                player.grab_item(player.current_room.items[0]) 
+                player.current_room.items.remove(player.current_room.items[0]) 
+
+            else:
+                print(f"There is nothing here")
+
+        elif cmd in commands[8:]:
+
+            if cmd == "drop armor":
+                print(f"You remove the armor and slam it on the ground")
+                player.drop_item("Iron Armor")
+
+            if cmd == "drop sword":
+                player.drop_item('Short Sword')
+                print(f"You drive the sword into the ground and leave it behind.")
+
+        elif cmd == "inventory":
+            player.get_inventory()
+
+    else:
+        print(f'\nPlease say something I can understand {player.name}')
